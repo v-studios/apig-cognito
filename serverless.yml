@@ -1,0 +1,19 @@
+service: apigCognito
+
+frameworkVersion: '>=1.26.1 <2.0.0'
+
+provider:
+  name: aws
+  # Don't upgrade to python3.7 until http://tiny.cc/o5zf8y is fixed.
+  runtime: python3.6
+  region: us-east-1
+
+functions:
+  root:
+    name: root-${opt:stage}
+    handler: handler.get
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
