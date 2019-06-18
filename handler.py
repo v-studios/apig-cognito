@@ -1,6 +1,6 @@
 from lib import (log_event, make_log, make_response,)
 
-log = make_log(log_level='debug')
+log = make_log(__file__, log_level='debug')
 
 
 def get(event, context):

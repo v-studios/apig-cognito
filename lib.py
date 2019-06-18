@@ -13,14 +13,17 @@ def make_log(caller_fname, log_level='info', log_fmt_str=DEFAULT_FORMAT_STR):
     # Convert log_level arg to logging module value.
     level = getattr(logging, log_level.upper())
     # Name logger after calling script's name.
-    logger_name = os.path.split(caller)[-1].replace('.py', '')
-    # Set some kind of global log level because it works....
-    logging.basicConfig(level=level)
-    # Make a logger w/ the right name, log level, and format.
-    log = logging.getLogger(logger_name)
-    log.setLevel(level)
+    logger_name = os.path.split(caller_fname)[-1].replace('.py', '')
+    # Prepare a formatter for the log stream handler.
     formatter = logging.Formatter(log_fmt_str)
-    log.setFormatter(formatter)
+    # Make a logger w/ the right name.
+    log = logging.getLogger(logger_name)
+    # Set to DEBUG because no other handlers can go higher than the base level.
+    log.setLevel(logging.DEBUG)
+    # Create a console handler w/ the correct format & specified log level.
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    ch.setFormatter(formatter)
     # Silence boto.
     for lib in ('boto', 'boto3', 'botocore'):
         logging.getLogger(lib).setLevel(logging.WARNING)

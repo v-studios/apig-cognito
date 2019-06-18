@@ -107,3 +107,6 @@ venv.bak/
 .nvmrc
 .envrc
 node_modules/
+
+# Serverless state files
+.serverless
