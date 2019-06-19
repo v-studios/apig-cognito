@@ -4,6 +4,7 @@
   "description": "Test drive Cognito protection of APIG endpoints.",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -14,5 +15,10 @@
   "author": "V! Studios",
   "license": "SEE LICENSE IN LICENSE.txt",
   "homepage": "https://github.com/v-studios/apig-cognito#readme",
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3"
+  }
 }
