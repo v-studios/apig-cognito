@@ -1,17 +1,26 @@
 service: apigCognito
 
-frameworkVersion: '>=1.26.1 <2.0.0'
+frameworkVersion: '>=1.45.1 <2.0.0'
 
 provider:
   name: aws
   region: us-east-1
+  stage: ${self:custom.currentStage}
+
+custom:
+  defaultStage: dev
+  currentStage: ${opt:stage, self:custom.defaultStage}
+  # Physical ID: us-east-1_LRKpiwwhY
+  userPoolName: test-user-pool-${self:custom.currentStage}
+  # Physical ID: 4la5m8d01u3g5d0nduta59rndl
+  userPoolClientName: test-user-pool-client-${self:custom.currentStage}
 
 functions:
   root:
     # Don't upgrade to python3.7 until http://tiny.cc/o5zf8y is fixed.
     runtime: python3.6
-    name: root-${opt:stage}
-    handler: api/handler.get
+    name: root-${self:custom.currentStage}
+    handler: api/root.get
     events:
       - http:
           path: /
@@ -19,10 +28,67 @@ functions:
           cors: true
   auth:
     runtime: nodejs8.10
-    name: auth-${opt:stage}
+    name: auth-${self:custom.currentStage}
     handler: auth/handler.get
     events:
       - http:
           path: /auth
           method: get
           cors: true
+  secret:
+    runtime: python3.6
+    name: secret-${self:custom.currentStage}
+    handler: api/secret.get
+    events:
+      - http:
+          path: /secret
+          method: get
+          cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
+
+resources:
+  Resources:
+    CognitoUserPool:
+      Type: "AWS::Cognito::UserPool"
+      Properties:
+        MfaConfiguration: OFF
+        UserPoolName: ${self:custom.userPoolName}
+        UsernameAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireLowercase: False
+            RequireNumbers: True
+            RequireSymbols: False
+            RequireUppercase: True
+    CognitoUserPoolClient:
+      Type: "AWS::Cognito::UserPoolClient"
+      Properties:
+        ClientName: ${self:custom.userPoolClientName}
+        GenerateSecret: False
+        UserPoolId:
+          Ref: CognitoUserPool
+    ApiGatewayAuthorizer:
+      DependsOn:
+        - ApiGatewayRestApi
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: cognito-authorizer-${self:custom.currentStage}
+        IdentitySource: method.request.header.Authorization
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::GetAtt: [CognitoUserPool, Arn]
+  Outputs:
+    CognitoUserPoolArn:
+      Value:
+        Fn::GetAtt:
+          - CognitoUserPool
+          - Arn
+      Export:
+        Name: CognitoUserPoolArn-${self:custom.currentStage}
