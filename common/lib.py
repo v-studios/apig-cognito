@@ -30,8 +30,9 @@ def make_log(caller_fname, log_level='info', log_fmt_str=DEFAULT_FORMAT_STR):
     return log
 
 
-def make_response(status_code, body):
+def make_response(status_code, body, headers=None):
     return {
         'statusCode': status_code,
         'body': json.dumps(body),
+        'headers': headers,
     }

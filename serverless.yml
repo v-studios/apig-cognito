@@ -27,7 +27,7 @@ functions:
           method: get
           cors: true
   auth:
-    runtime: nodejs8.10
+    runtime: python3.6
     name: auth-${self:custom.currentStage}
     handler: auth/handler.get
     events:

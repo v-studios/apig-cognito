@@ -1,4 +1,4 @@
-from api.lib import (log_event, make_log, make_response,)
+from common.lib import (log_event, make_log, make_response,)
 
 log = make_log(__file__, log_level='debug')
 
